@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set -e
+
+IMAGE=ipython_notebooks
+
+HOST_DIR="$(cd $(dirname "$0")/../ && pwd -P)" # parent of this script is the host dir
+GUEST_DIR="/srv/analysis"
+MOUNT="$HOST_DIR:$GUEST_DIR"
+PORTS="8181:8888"
+CMD="bin/ipython"
+
+usage() {
+  echo "Start the $IMAGE Docker container image"
+  echo
+  echo "Usage: $0 [options] [command]"
+  echo "  command: any command that can run in the container (default: bin/ipython)"
+  echo
+  echo "Options:"
+  echo "  -h | --help   this dialog"
+  echo
+}
+
+while test "$#" -gt 0
+do
+  case "$1" in
+    --help|-h)
+      usage && exit 0
+      ;;
+    *)
+      CMD=$1
+      shift;
+  esac
+done
+
+echo "Starting with mounting the local directory '$HOST_DIR' into the container as '$GUEST_DIR' with ports '$PORTS' and executing '$CMD'"
+
+docker run \
+  --interactive \
+  --volume="$MOUNT" \
+  --tty=true \
+  --publish "$PORTS" \
+  --workdir "$GUEST_DIR" \
+  "$IMAGE" "$CMD"

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+
+IMAGE=ipython_notebooks
+
+usage() {
+  echo "Builds the $IMAGE Docker container image."
+  echo
+  echo "Usage: $0"
+  echo "  -h | --help       see this dialog"
+  echo "  -f | --no-cache   build image from scratch"
+  echo
+}
+
+while test "$#" -gt 0
+do
+  case "$1" in
+    --help|-h)
+      usage && exit 0
+      ;;
+    --no-cache|-f)
+      NOCACHE="--no-cache=true"
+      shift
+      ;;
+  esac
+done
+
+docker build $NOCACHE -t $IMAGE .
