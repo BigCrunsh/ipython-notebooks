@@ -1,0 +1,6 @@
+# python
+*.pyc
+.ipynb_checkpoints/
+analysis.egg-info/
+build/
+dist/
