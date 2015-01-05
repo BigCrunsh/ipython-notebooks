@@ -35,7 +35,8 @@ You've created millions of images and containers, and now your disk is at 100%.
 
 - remove all images: ```docker images | awk '{print $3}'  | xargs docker rmi```
 
-### Can't Start Docker Container with `boot2docker`
+### Issues with boot2docker
+#### Can't Start Docker Container
 
 ```
 $ ./bin/docker-start
@@ -59,3 +60,15 @@ To connect the Docker client to the Docker daemon, please set:
 
 Copy-and-paste the environment variables printed by `boot2docker` and run
 `docker-start` again.
+
+#### Can't Start `boot2docker` after Restart
+
+The docker container cannot be started and starting boot2docker gives the following output:
+```
+boot2docker up
+error in run: Failed to start machine "boot2docker-vm": exit status 1
+```
+
+Following [stackoverflow](http://stackoverflow.com/questions/26572112/running-boot2docker-error-in-run-failed-to-get-machine-boot2docker-vm-mac), the reason is "VirtualBox is trying to be smart and "saves" the vm, which is a state boot2docker doesn't seem able to gracefully recover from."
+
+**Solution**: Power-down the vm in the VirtualBox and then run `boot2docker up`.
