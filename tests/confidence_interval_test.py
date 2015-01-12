@@ -291,3 +291,37 @@ class TestBinomialPropertionCIs(object):
         ])
         got = ci.BinomialPropertionCIs.ci_wilson(self.estimator)
         np.testing.assert_almost_equal(got, expected)
+
+class TestRatioOfBinomialPropertionCIs(object):
+    """
+    Test class for confidence intervals for the ratio of two binomial
+    proportions.
+    """
+
+    @classmethod
+    def setup(cls):
+        """
+        Setup tests
+        """
+        samples = np.array([
+            [13, 0, 12, 25],
+            [12, 0, 10, 28],
+            [10, 0, 19, 21]
+        ]).T
+        arr = np.zeros((3,), dtype=[
+            ('TP', 'float'), ('TN', 'float'), ('FP', 'float'), ('FN', 'float')
+        ])
+        arr['TP'], arr['TN'] = samples[0], samples[1]
+        arr['FP'], arr['FN'] = samples[2], samples[3]
+
+        cls.estimator = ci.PrecisionEstimator(arr)
+
+    def test_ci_katz(self):
+        """Validate Katz intervals"""
+        expected = np.array([
+            (0.15757100260674056, 0.39667584497727154),
+            (0.14159960372603347, 0.37550114782331306),
+            (0.11050245456583023, 0.33230610491418494)
+        ])
+        got = ci.RatioOfBinomialPropertionCIs.ci_katz(self.estimator)
+        np.testing.assert_almost_equal(got, expected)

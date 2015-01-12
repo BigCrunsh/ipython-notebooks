@@ -55,8 +55,8 @@ class PrecisionEstimator(object):
         self.stderr = np.sqrt(sample_var/self.num_eff_draws)
 
         # ratio is log normal (see Koopman 2.1)
-        self.log_stderr = 1.0/conf_mats['TP'] - 2.0/self.num_draws +\
-                          1.0/(conf_mats['TP']+conf_mats['FP'])
+        self.log_stderr = np.sqrt(1.0/conf_mats['TP'] - 2.0/self.num_draws +\
+                          1.0/(conf_mats['TP']+conf_mats['FP']))
 
 class RecallEstimator(object):
     """
@@ -94,8 +94,8 @@ class RecallEstimator(object):
         self.stderr = np.sqrt(sample_var/self.num_eff_draws)
 
         # ratio is log normal (see Koopman 2.1)
-        self.log_stderr = 1.0/conf_mats['TP'] - 2.0/self.num_draws +\
-                          1.0/(conf_mats['TP']+conf_mats['FP'])
+        self.log_stderr = np.sqrt(1.0/conf_mats['TP'] - 2.0/self.num_draws +\
+                          1.0/(conf_mats['TP']+conf_mats['FN']))
 
 class FMeasureEstimator(object):
     """
@@ -202,9 +202,10 @@ class RatioOfBinomialPropertionCIs(object):
     @staticmethod
     def ci_katz(estimator, alpha=0.05):
         """
-
+        Katz interval.
         """
         z_a = norm.ppf(1.0-alpha/2.0)
 
         log_width = z_a*estimator.log_stderr
-        return [(p*exp(-z), p*exp(z)) for (p, z) in zip(estimator.value, log_width)]
+        return [(p*np.exp(-z), p*np.exp(z))
+                    for (p, z) in zip(estimator.value, log_width)]
