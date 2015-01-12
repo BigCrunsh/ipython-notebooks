@@ -95,7 +95,7 @@ class TestPrecisionEstimator(object):
 
     def test_stderr(self):
         """Precision: Validate standard error estimate"""
-        expected = [0.09991997, 0.10615895, 0.08826323]
+        expected = [0.14130817, 0.16004063, 0.1158953]
         got = self.estimator.stderr
         np.testing.assert_almost_equal(got, expected)
 
@@ -142,7 +142,7 @@ class TestRecallEstimator(object):
 
     def test_stderr(self):
         """Recall: Validate standard error estimate"""
-        expected = [0.07696022, 0.07245688, 0.08395897]
+        expected = [0.08827942, 0.08100926, 0.106628]
         got = self.estimator.stderr
         np.testing.assert_almost_equal(got, expected)
 
@@ -200,7 +200,7 @@ class TestFMeasureEstimator(object):
 
     def test_stderr(self):
         """F-measure: Validate standard error estimate"""
-        expected = [0.07711392, 0.07579905, 0.07923189]
+        expected = [0.09337714, 0.09111938, 0.10161276]
         got = self.estimator.stderr
         np.testing.assert_almost_equal(got, expected)
 
