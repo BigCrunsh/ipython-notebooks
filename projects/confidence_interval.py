@@ -11,6 +11,7 @@ class AccuracyEstimator(object):
     Estimates accuracy and standard error from contigency table.
     """
     def __init__(self, conf_mats):
+        self.conf_mats = conf_mats
         self.num_correct = conf_mats['TP'] + conf_mats['TN']
         self.num_draws = conf_mats['TP'] + conf_mats['TN'] + \
                          conf_mats['FP'] + conf_mats['FN']
@@ -24,6 +25,7 @@ class PrecisionEstimator(object):
     Estimates precision and standard error from contigency table.
     """
     def __init__(self, conf_mats):
+        self.conf_mats = conf_mats
         self.num_draws = conf_mats['TP'] + conf_mats['TN'] + \
                          conf_mats['FP'] + conf_mats['FN']
         self.num_eff_draws = conf_mats['TP'] + conf_mats['FP']
@@ -52,12 +54,17 @@ class PrecisionEstimator(object):
         # TODO(cs): double-check / justify num_eff_draws instead of num_draws
         self.stderr = np.sqrt(sample_var/self.num_eff_draws)
 
+        # ratio is log normal (see Koopman 2.1)
+        self.log_stderr = 1.0/conf_mats['TP'] - 2.0/self.num_draws +\
+                          1.0/(conf_mats['TP']+conf_mats['FP'])
+
 class RecallEstimator(object):
     """
     Recall estimator:
     Estimates recall and standard error from contigency table.
     """
     def __init__(self, conf_mats):
+        self.conf_mats = conf_mats
         self.num_draws = conf_mats['TP'] + conf_mats['TN'] + \
                          conf_mats['FP'] + conf_mats['FN']
         self.num_eff_draws = conf_mats['TP'] + conf_mats['FN']
@@ -86,12 +93,18 @@ class RecallEstimator(object):
         # TODO(cs): double-check / justify num_eff_draws instead of num_draws
         self.stderr = np.sqrt(sample_var/self.num_eff_draws)
 
+        # ratio is log normal (see Koopman 2.1)
+        self.log_stderr = 1.0/conf_mats['TP'] - 2.0/self.num_draws +\
+                          1.0/(conf_mats['TP']+conf_mats['FP'])
+
 class FMeasureEstimator(object):
     """
     F-Measure estimator:
     Estimates F-Measure and standard error from contigency table.
     """
     def __init__(self, conf_mats, eta=0.5):
+        self.conf_mats = conf_mats
+        self.eta = eta
         self.num_draws = conf_mats['TP'] + conf_mats['TN'] + \
                          conf_mats['FP'] + conf_mats['FN']
         self.num_eff_draws = conf_mats['TP'] + \
@@ -153,7 +166,7 @@ class BinomialPropertionCIs(object):
         (approx. 2 for alpha=0.05) positive and negative pseudo counts and apply
         standard Wald interval.
         """
-        z_a = norm.ppf(1-alpha/2.0)
+        z_a = norm.ppf(1.0-alpha/2.0)
         z_a2 = z_a*z_a
 
         num_draws_adj = estimator.num_draws+z_a2
@@ -180,3 +193,18 @@ class BinomialPropertionCIs(object):
 
         width = z_a*stderr_adj
         return [(p-z, p+z) for (p, z) in zip(val_adj, width)]
+
+class RatioOfBinomialPropertionCIs(object):
+    """
+    Confidence intervals for the ratio of two binomial propoertions.
+    """
+
+    @staticmethod
+    def ci_katz(estimator, alpha=0.05):
+        """
+
+        """
+        z_a = norm.ppf(1.0-alpha/2.0)
+
+        log_width = z_a*estimator.log_stderr
+        return [(p*exp(-z), p*exp(z)) for (p, z) in zip(estimator.value, log_width)]
